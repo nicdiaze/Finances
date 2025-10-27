@@ -1,22 +1,27 @@
 # 💰 Historial Financiero
 
-Una aplicación web desarrollada con Next.js, TypeScript, Tailwind CSS y MongoDB para gestionar y hacer seguimiento de tus finanzas personales.
+Una aplicación web desarrollada con Next.js, TypeScript, Tailwind CSS y Firebase para gestionar y hacer seguimiento de tus finanzas personales.
 
-## 🚀 Características
+## 🚀 Características Principales
 
-- ✅ Registro de ingresos y gastos
-- 📊 Dashboard con estadísticas en tiempo real
-- 🏷️ Categorización de transacciones
-- 📱 Interfaz responsive y moderna
-- 🔍 Filtrado y búsqueda de transacciones
-- 📈 Balance y métricas financieras
+- ✅ **CRUD Completo** - Crear, leer, actualizar y eliminar transacciones
+- 📊 **Dashboard Avanzado** - Estadísticas y gráficos en tiempo real
+- 🏷️ **Categorización Inteligente** - Organiza por tipos de ingresos/gastos
+- 📱 **Diseño Responsive** - Interfaz moderna que funciona en todos los dispositivos
+- 🔍 **Filtros Avanzados** - Buscar por fecha, categoría, tipo y texto
+- 📈 **Métricas Financieras** - Balance, tendencias y análisis visual
+- � **Exportación de Datos** - Descarga en CSV y JSON
+- 🌙 **Modo Oscuro/Claro** - Cambia entre temas según tu preferencia
+- 🔔 **Notificaciones Toast** - Feedback visual de todas las acciones
+- ⚡ **Tiempo Real** - Sincronización automática con Firebase
 
-## 🛠️ Tecnologías
+## 🛠️ Stack Tecnológico
 
 - **Frontend:** Next.js 16, React 19, TypeScript
-- **Estilos:** Tailwind CSS
-- **Base de datos:** MongoDB con Mongoose
-- **API:** Next.js API Routes
+- **Estilos:** Tailwind CSS con animaciones personalizadas
+- **Base de datos:** Firebase Firestore (NoSQL)
+- **Hosting:** Firebase Hosting con CDN global
+- **API:** Next.js API Routes + Firebase Admin SDK
 
 ## ⚙️ Configuración
 
@@ -26,40 +31,75 @@ Una aplicación web desarrollada con Next.js, TypeScript, Tailwind CSS y MongoDB
 npm install
 ```
 
-### 2. Configurar MongoDB
+### 2. Configurar Firebase
 
-Tienes dos opciones:
+#### A. Crear proyecto Firebase
+1. Ve a [Firebase Console](https://console.firebase.google.com/)
+2. Crea un nuevo proyecto con el ID de tu preferencia
+3. Habilita Firestore Database en modo test
+4. Obtén las credenciales de configuración
 
-#### Opción A: MongoDB Local
-1. Instala MongoDB localmente
-2. Inicia el servicio de MongoDB
-3. La URI por defecto será: `mongodb://localhost:27017/finance-tracker`
-
-#### Opción B: MongoDB Atlas (Recomendado)
-1. Crea una cuenta en [MongoDB Atlas](https://cloud.mongodb.com/)
-2. Crea un nuevo cluster
-3. Obtén la cadena de conexión
-4. Reemplaza `<username>`, `<password>` y `<cluster-name>` con tus datos
+#### B. Configurar Firestore
+1. En Firebase Console → Firestore Database
+2. Crear database en modo "test"
+3. Aplicar las reglas de seguridad desde `firestore.rules`
 
 ### 3. Variables de entorno
 
-Edita el archivo `.env.local` y configura:
+Crea/edita el archivo `.env.local`:
 
 ```env
-# Para MongoDB local:
-MONGODB_URI=mongodb://localhost:27017/finance-tracker
+# Firebase Configuration - Reemplaza con tus credenciales de Firebase Console
+NEXT_PUBLIC_FIREBASE_API_KEY=tu-firebase-api-key-aqui
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=tu-proyecto.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_DATABASE_URL=https://tu-proyecto-default-rtdb.firebaseio.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=tu-proyecto-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=tu-proyecto.firebasestorage.app
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=123456789
+NEXT_PUBLIC_FIREBASE_APP_ID=1:123456789:web:abcdef123456
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=G-XXXXXXXXXX
 
-# Para MongoDB Atlas:
-# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/finance-tracker?retryWrites=true&w=majority
+# Database Provider (firebase o mongodb para compatibilidad)
+DATABASE_PROVIDER=firebase
 
-# Secreto para Next.js (genera uno aleatorio)
-NEXTAUTH_SECRET=tu-secreto-super-seguro-aqui
+# Secreto para Next.js - Genera uno aleatorio de 256+ caracteres
+NEXTAUTH_SECRET=genera-un-secreto-super-seguro-y-aleatorio-aqui
 ```
 
-### 4. Ejecutar la aplicación
+### 4. Configurar reglas de Firestore
+
+En Firebase Console → Firestore → Rules, aplica:
+
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /transactions/{transactionId} {
+      allow read, write: if true; // Modo desarrollo
+      allow create: if isValidTransaction(request.resource.data);
+      allow update: if isValidTransaction(request.resource.data);
+    }
+    
+    function isValidTransaction(data) {
+      return data.keys().hasAll(['amount', 'description', 'category', 'type', 'date']) &&
+             data.amount is number && data.amount > 0 &&
+             data.description is string && data.description.size() > 0 &&
+             data.category is string && data.type in ['ingreso', 'gasto'] &&
+             data.date is timestamp;
+    }
+  }
+}
+```
+
+### 5. Ejecutar la aplicación
 
 ```bash
+# Desarrollo
 npm run dev
+
+# Producción
+npm run build
+npm start
 ```
 
 La aplicación estará disponible en `http://localhost:3000`
@@ -70,39 +110,68 @@ La aplicación estará disponible en `http://localhost:3000`
 nextjs_demo/
 ├── app/
 │   ├── api/
-│   │   └── transactions/
-│   │       ├── route.ts          # GET y POST transacciones
-│   │       ├── [id]/
-│   │       │   └── route.ts      # PUT y DELETE por ID
-│   │       └── stats/
-│   │           └── route.ts      # Estadísticas
-│   ├── globals.css
-│   ├── layout.tsx
-│   └── page.tsx                  # Página principal
+│   │   ├── transactions/         # API MongoDB (compatibilidad)
+│   │   └── firebase/
+│   │       └── transactions/     # API Firebase principal
+│   │           ├── route.ts      # GET y POST transacciones
+│   │           ├── [id]/
+│   │           │   └── route.ts  # PUT y DELETE por ID
+│   │           └── stats/
+│   │               └── route.ts  # Estadísticas y métricas
+│   ├── globals.css               # Estilos globales + modo oscuro
+│   ├── layout.tsx                # Layout principal
+│   └── page.tsx                  # Aplicación principal
 ├── components/
-│   ├── TransactionForm.tsx       # Formulario de transacciones
-│   ├── TransactionList.tsx       # Lista de transacciones
-│   └── FinanceStats.tsx          # Componente de estadísticas
+│   ├── TransactionForm.tsx       # Formulario crear/editar
+│   ├── TransactionList.tsx       # Lista con filtros
+│   ├── FilterBar.tsx             # Filtros avanzados
+│   ├── ExportButton.tsx          # Exportación CSV/JSON
+│   ├── SimpleCharts.tsx          # Gráficos y visualizaciones
+│   ├── ThemeToggle.tsx           # Cambio de tema
+│   └── Toast.tsx                 # Notificaciones
 ├── lib/
-│   └── dbConnect.ts              # Conexión a MongoDB
-├── models/
-│   └── Transaction.ts            # Modelo de datos
+│   ├── firebase.ts               # Configuración Firebase
+│   ├── firestore.ts              # Servicios Firestore
+│   └── database-config.ts        # Abstracción dual DB
+├── types/
+│   └── transaction.ts            # Tipos TypeScript
+├── firebase.json                 # Config Firebase Hosting
+├── firestore.rules               # Reglas de seguridad
 └── .env.local                    # Variables de entorno
 ```
 
-## 🎯 Uso
+## 🎯 Características y Uso
 
-### Agregar transacciones
-1. Haz clic en "Nueva Transacción"
-2. Completa el formulario:
-   - **Tipo:** Ingreso o Gasto
-   - **Monto:** Cantidad en dólares
-   - **Descripción:** Detalle de la transacción
-   - **Categoría:** Selecciona según el tipo
-   - **Fecha:** Por defecto es hoy
-3. Guarda la transacción
+### 💰 Gestión de Transacciones
+- **Crear:** Botón "Nueva Transacción" → Completa formulario → Guardar
+- **Editar:** Click en ✏️ junto a cualquier transacción
+- **Eliminar:** Click en 🗑️ y confirmar acción
+- **Visualizar:** Lista completa con paginación automática
 
-### Categorías disponibles
+### 🔍 Filtros Avanzados
+- **Por tipo:** Ingresos, gastos o ambos
+- **Por categoría:** Filtro dropdown dinámico
+- **Por fecha:** Rango de fechas personalizable
+- **Búsqueda:** Texto libre en descripción
+- **Combinados:** Todos los filtros funcionan juntos
+
+### 📊 Dashboard de Estadísticas
+- **Balance total:** Diferencia entre ingresos y gastos
+- **Totales por tipo:** Montos separados de ingresos/gastos
+- **Gráfico de barras:** Comparación visual por categorías
+- **Tendencias:** Análisis temporal de tus finanzas
+
+### 📤 Exportación de Datos
+- **CSV:** Para Excel o Google Sheets
+- **JSON:** Para desarrolladores o backups
+- **Filtros aplicados:** Exporta solo datos filtrados
+
+### 🌙 Personalización
+- **Modo oscuro/claro:** Toggle en la esquina superior
+- **Responsive:** Funciona en móvil, tablet y desktop
+- **Notificaciones:** Feedback visual de todas las acciones
+
+### 🏷️ Categorías Disponibles
 
 **Ingresos:**
 - Salario, Freelance, Inversiones, Ventas, Otros ingresos
@@ -110,45 +179,133 @@ nextjs_demo/
 **Gastos:**
 - Alimentación, Transporte, Vivienda, Salud, Entretenimiento, Educación, Ropa, Servicios, Otros gastos
 
-### Gestionar transacciones
-- **Editar:** Haz clic en "Editar" junto a cualquier transacción
-- **Eliminar:** Haz clic en "Eliminar" y confirma la acción
-
 ## 🔧 API Endpoints
 
-### Transacciones
-- `GET /api/transactions` - Listar transacciones
-- `POST /api/transactions` - Crear transacción
-- `GET /api/transactions/[id]` - Obtener transacción específica
-- `PUT /api/transactions/[id]` - Actualizar transacción
-- `DELETE /api/transactions/[id]` - Eliminar transacción
+### Firebase API (Principal)
+```
+GET    /api/firebase/transactions       # Listar transacciones con filtros
+POST   /api/firebase/transactions       # Crear nueva transacción
+GET    /api/firebase/transactions/[id]  # Obtener transacción específica
+PUT    /api/firebase/transactions/[id]  # Actualizar transacción
+DELETE /api/firebase/transactions/[id]  # Eliminar transacción
+GET    /api/firebase/transactions/stats # Estadísticas y métricas
+```
 
-### Estadísticas
-- `GET /api/transactions/stats` - Obtener estadísticas
+### Parámetros de consulta disponibles
+```
+?type=ingreso|gasto           # Filtrar por tipo
+?category=categoria           # Filtrar por categoría específica
+?startDate=YYYY-MM-DD         # Fecha inicio (ISO)
+?endDate=YYYY-MM-DD           # Fecha fin (ISO)
+?search=texto                 # Buscar en descripción
+?limit=50                     # Límite de resultados
+```
 
-### Parámetros de consulta
-- `type`: Filtrar por 'ingreso' o 'gasto'
-- `category`: Filtrar por categoría específica
-- `limit`: Número máximo de resultados (por defecto 50)
-- `page`: Página para paginación (por defecto 1)
+### Estructura de datos (Firebase)
+```typescript
+interface Transaction {
+  id?: string;                 // Auto-generado por Firestore
+  amount: number;              # Monto (siempre positivo)
+  description: string;         # Descripción de la transacción
+  category: string;            # Categoría predefinida
+  type: 'ingreso' | 'gasto';   # Tipo de transacción
+  date: Date;                  # Fecha de la transacción
+  createdAt?: Date;            # Timestamp de creación
+  updatedAt?: Date;            # Timestamp de actualización
+}
+```
 
 ## 🚀 Despliegue
 
-### Vercel (Recomendado)
-1. Conecta tu repositorio con Vercel
-2. Configura las variables de entorno en el dashboard de Vercel
-3. Despliega automáticamente
+### Firebase Hosting (Recomendado)
+```bash
+# Instalar Firebase CLI
+npm install -g firebase-tools
 
-### Otras plataformas
-Asegúrate de configurar las variables de entorno en tu plataforma de despliegue.
+# Login en Firebase
+firebase login
+
+# Seleccionar proyecto
+firebase use tu-proyecto-id
+
+# Build y deploy
+npm run build
+firebase deploy
+```
+
+**URL de producción:** `https://tu-proyecto-id.web.app`
+
+### Vercel (Alternativa)
+1. Conecta repositorio con Vercel
+2. Configura variables de entorno Firebase
+3. Deploy automático en cada push
+
+### Variables de entorno para producción
+Asegúrate de configurar todas las variables `NEXT_PUBLIC_FIREBASE_*` en tu plataforma de hosting.
 
 ## 🆘 Solución de problemas
 
-### Error de conexión a MongoDB
-- Verifica que la URI en `.env.local` sea correcta
-- Si usas MongoDB Atlas, asegúrate de que tu IP esté en la whitelist
-- Verifica que el usuario tenga los permisos necesarios
+### Errores de Firebase
+```bash
+# Error: Firebase project not found
+firebase use tu-proyecto-id
 
-### Errores de compilación de TypeScript
-- Ejecuta `npm run build` para ver errores específicos
-- Verifica que todas las dependencias estén instaladas
+# Error: Permission denied
+# Verifica reglas de Firestore en Firebase Console
+
+# Error: Firebase not initialized
+# Verifica variables NEXT_PUBLIC_FIREBASE_* en .env.local
+```
+
+### Errores de compilación
+```bash
+# TypeScript errors
+npm run build                    # Ver errores específicos
+npm run type-check               # Solo verificar tipos
+
+# Dependencias faltantes
+npm install                      # Reinstalar dependencias
+rm -rf node_modules package-lock.json && npm install  # Limpiar y reinstalar
+```
+
+### Problemas de desarrollo
+```bash
+# Puerto ocupado
+npm run dev -- -p 3001          # Usar puerto diferente
+
+# Cache problems
+rm -rf .next                     # Limpiar cache de Next.js
+
+# Environment variables not loading
+# Asegúrate que .env.local esté en la raíz del proyecto
+```
+
+### Depuración
+- **Console del navegador:** Revisa errores JavaScript
+- **Firebase Console:** Verifica datos en Firestore
+- **Network tab:** Inspecciona llamadas a API
+- **Firestore rules:** Simula consultas en Rules Playground
+
+## 📚 Recursos adicionales
+
+- [Documentación Firebase](https://firebase.google.com/docs)
+- [Next.js Docs](https://nextjs.org/docs)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [TypeScript Handbook](https://www.typescriptlang.org/docs/)
+
+## 📄 Licencia
+
+MIT License - libre para usar y modificar.
+
+## 🤝 Contribuciones
+
+¡Las contribuciones son bienvenidas! Por favor:
+1. Fork del repositorio
+2. Crea una rama para tu feature
+3. Commit tus cambios
+4. Push a la rama
+5. Abre un Pull Request
+
+---
+
+**Desarrollado con ❤️ usando Next.js y Firebase**
