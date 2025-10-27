@@ -3,7 +3,8 @@
 import { useState } from 'react'
 
 interface Transaction {
-  _id: string
+  _id?: string  // MongoDB
+  id?: string   // Firebase
   amount: number
   description: string
   category: string
@@ -107,7 +108,7 @@ export default function TransactionList({ transactions, onEdit, onDelete, loadin
 
       <div className="divide-y divide-gray-200">
         {transactions.map((transaction) => (
-          <div key={transaction._id} className="p-6 hover:bg-gray-50 transition-colors">
+          <div key={transaction._id || transaction.id} className="p-6 hover:bg-gray-50 transition-colors">
             <div className="flex items-center justify-between">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-3 mb-1">
@@ -147,14 +148,17 @@ export default function TransactionList({ transactions, onEdit, onDelete, loadin
                   </button>
                   
                   <button
-                    onClick={() => handleDelete(transaction._id)}
+                    onClick={() => {
+                      const id = transaction._id || transaction.id || ''
+                      if (id) handleDelete(id)
+                    }}
                     className={`text-sm font-medium ${
-                      deleteConfirm === transaction._id
+                      deleteConfirm === (transaction._id || transaction.id)
                         ? 'text-red-800 bg-red-100 px-2 py-1 rounded'
                         : 'text-red-600 hover:text-red-800'
                     }`}
                   >
-                    {deleteConfirm === transaction._id ? '¿Confirmar?' : 'Eliminar'}
+                    {deleteConfirm === (transaction._id || transaction.id) ? '¿Confirmar?' : 'Eliminar'}
                   </button>
                 </div>
               </div>

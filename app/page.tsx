@@ -9,9 +9,11 @@ import ExportButton from '@/components/ExportButton'
 import SimpleCharts from '@/components/SimpleCharts'
 import ThemeToggle from '@/components/ThemeToggle'
 import ToastContainer, { useToast } from '@/components/Toast'
+import DATABASE_CONFIG from '@/lib/database-config'
 
 interface Transaction {
-  _id: string
+  _id?: string  // MongoDB
+  id?: string   // Firebase
   amount: number
   description: string
   category: string
@@ -75,10 +77,16 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState('')
   const toast = useToast()
 
+  // Helper para obtener ID de transacción (compatible con MongoDB y Firebase)
+  const getTransactionId = (transaction: Transaction): string => {
+    return transaction._id || transaction.id || ''
+  }
+
   // Cargar todas las transacciones
   const fetchTransactions = async () => {
     try {
-      const response = await fetch('/api/transactions?limit=100')
+      const url = `${DATABASE_CONFIG.endpoints.transactions()}?limit=100`
+      const response = await fetch(url)
       const data = await response.json()
       
       if (data.success) {
@@ -100,21 +108,28 @@ export default function Home() {
   // Cargar estadísticas
   const fetchStats = async () => {
     try {
-      const response = await fetch('/api/transactions/stats')
+      const url = DATABASE_CONFIG.endpoints.stats()
+      const response = await fetch(url)
       const data = await response.json()
       
       if (data.success) {
         setStats(data.data.summary)
+        
+        // Adaptar estructura de datos para diferentes providers
+        const byCategory = DATABASE_CONFIG.provider === 'firebase' 
+          ? data.data.byCategory 
+          : data.data.byCategory.map((item: any) => ({
+              category: item._id?.category || item.category,
+              total: item.total,
+              count: item.count,
+              type: item._id?.type || item.type
+            }))
+            
         setChartData({
           totalIngresos: data.data.summary.totalIngresos,
           totalGastos: data.data.summary.totalGastos,
           balance: data.data.summary.balance,
-          byCategory: data.data.byCategory.map((item: any) => ({
-            category: item._id.category,
-            total: item.total,
-            count: item.count,
-            type: item._id.type
-          }))
+          byCategory
         })
       } else {
         console.error('Error al cargar estadísticas:', data.error)
@@ -178,7 +193,8 @@ export default function Home() {
   // Crear nueva transacción
   const handleCreateTransaction = async (formData: any) => {
     try {
-      const response = await fetch('/api/transactions', {
+      const url = DATABASE_CONFIG.endpoints.transactions()
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -207,7 +223,13 @@ export default function Home() {
     if (!editingTransaction) return
 
     try {
-      const response = await fetch(`/api/transactions/${editingTransaction._id}`, {
+      const transactionId = getTransactionId(editingTransaction)
+      if (!transactionId) {
+        toast.error('Error: ID de transacción no válido')
+        return
+      }
+      const url = DATABASE_CONFIG.endpoints.transactionById(transactionId)
+      const response = await fetch(url, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -234,7 +256,8 @@ export default function Home() {
   // Eliminar transacción
   const handleDeleteTransaction = async (id: string) => {
     try {
-      const response = await fetch(`/api/transactions/${id}`, {
+      const url = DATABASE_CONFIG.endpoints.transactionById(id)
+      const response = await fetch(url, {
         method: 'DELETE',
       })
 

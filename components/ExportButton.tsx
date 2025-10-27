@@ -1,7 +1,8 @@
 'use client'
 
 interface Transaction {
-  _id: string
+  _id?: string  // MongoDB
+  id?: string   // Firebase
   amount: number
   description: string
   category: string
@@ -101,7 +102,7 @@ export default function ExportButton({ transactions, filename = 'transacciones' 
         monto: formatAmount(transaction.amount, transaction.type),
         montoNumerico: transaction.amount,
         fechaOriginal: transaction.date,
-        id: transaction._id
+        id: transaction._id || transaction.id
       }))
 
       // Crear estadísticas de resumen
