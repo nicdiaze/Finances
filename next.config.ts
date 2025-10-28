@@ -4,8 +4,7 @@ const nextConfig: NextConfig = {
   experimental: {
     turbopackFileSystemCacheForDev: true,
   },
-  // Configuración para exportación estática (Firebase Hosting)
-  output: 'export',
+  // Sin output: 'export' para poder usar APIs del servidor
   trailingSlash: true,
   images: {
     unoptimized: true,

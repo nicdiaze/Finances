@@ -217,31 +217,45 @@ interface Transaction {
 
 ## 🚀 Despliegue
 
-### Firebase Hosting (Recomendado)
+### Vercel (Recomendado para Apps con API Routes)
 ```bash
-# Instalar Firebase CLI
-npm install -g firebase-tools
+# Conectar repositorio con Vercel
+vercel
 
-# Login en Firebase
-firebase login
-
-# Seleccionar proyecto
-firebase use tu-proyecto-id
-
-# Build y deploy
-npm run build
-firebase deploy
+# O usar GitHub integration:
+# 1. Conecta tu repositorio en vercel.com
+# 2. Configura variables de entorno Firebase
+# 3. Deploy automático en cada push
 ```
 
-**URL de producción:** `https://tu-proyecto-id.web.app`
+**Ventajas de Vercel:**
+- ✅ Soporte completo para API Routes
+- ✅ Deploy automático desde GitHub
+- ✅ Edge Functions globales
+- ✅ Perfect para Next.js
 
-### Vercel (Alternativa)
-1. Conecta repositorio con Vercel
-2. Configura variables de entorno Firebase
-3. Deploy automático en cada push
+### Netlify (Alternativa)
+```bash
+# Build para Netlify
+npm run build
+
+# Usar Netlify CLI
+netlify deploy --prod --dir=out
+```
 
 ### Variables de entorno para producción
-Asegúrate de configurar todas las variables `NEXT_PUBLIC_FIREBASE_*` en tu plataforma de hosting.
+Configura en tu plataforma de hosting:
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=tu-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=tu-proyecto.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=tu-proyecto-id
+# ... resto de variables Firebase
+DATABASE_PROVIDER=firebase
+NEXTAUTH_SECRET=tu-secreto-produccion
+```
+
+### ⚠️ Nota sobre Firebase Hosting
+Firebase Hosting está configurado solo para Firestore rules. Para una app completa con API Routes, se recomienda **Vercel** o **Netlify**.
 
 ## 🆘 Solución de problemas
 
