@@ -19,24 +19,26 @@ interface FinanceStatsProps {
 
 function StatsCard({ title, amount, type = 'balance', count }: StatsCardProps) {
   const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('es-ES', {
+    return new Intl.NumberFormat('es-CL', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'CLP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(Math.abs(amount))
   }
 
   const getColorClasses = () => {
     switch (type) {
       case 'ingreso':
-        return 'bg-green-50 border-green-200 text-green-800'
+        return 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-700 text-green-800 dark:text-green-300'
       case 'gasto':
-        return 'bg-red-50 border-red-200 text-red-800'
+        return 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 text-red-800 dark:text-red-300'
       case 'balance':
         return amount >= 0 
-          ? 'bg-blue-50 border-blue-200 text-blue-800'
-          : 'bg-red-50 border-red-200 text-red-800'
+          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-700 text-blue-800 dark:text-blue-300'
+          : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700 text-red-800 dark:text-red-300'
       default:
-        return 'bg-gray-50 border-gray-200 text-gray-800'
+        return 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-300'
     }
   }
 
@@ -77,7 +79,7 @@ export default function FinanceStats({ stats, loading }: FinanceStatsProps) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="p-6 bg-gray-50 rounded-lg border-2 border-gray-200 animate-pulse">
+          <div key={i} className="p-6 bg-gray-50 dark:bg-gray-800 rounded-lg border-2 border-gray-200 dark:border-gray-700 animate-pulse">
             <div className="space-y-3">
               <div className="h-4 bg-gray-200 rounded w-3/4"></div>
               <div className="h-8 bg-gray-200 rounded w-full"></div>

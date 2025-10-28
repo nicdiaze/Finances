@@ -41,8 +41,14 @@ export default function ExportButton({ transactions, filename = 'transacciones' 
   }
 
   const formatAmount = (amount: number, type: string) => {
-    const sign = type === 'ingreso' ? '+' : '-'
-    return `${sign}$${amount.toFixed(2)}`
+    const formattedAmount = new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount)
+    
+    return type === 'ingreso' ? `+${formattedAmount}` : `-${formattedAmount}`
   }
 
   const exportToCSV = () => {

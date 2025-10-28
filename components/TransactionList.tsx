@@ -26,16 +26,20 @@ const CATEGORY_LABELS: { [key: string]: string } = {
   'freelance': 'Freelance',
   'inversiones': 'Inversiones',
   'ventas': 'Ventas',
+  'aguinaldo': 'Aguinaldo',
+  'bonos': 'Bonos',
   'otros-ingresos': 'Otros ingresos',
   // Gastos
   'alimentacion': 'Alimentación',
-  'transporte': 'Transporte',
-  'vivienda': 'Vivienda',
-  'salud': 'Salud',
+  'transporte': 'Transporte/Locomoción',
+  'vivienda': 'Vivienda/Arriendo',
+  'salud': 'Salud/Isapre',
   'entretenimiento': 'Entretenimiento',
   'educacion': 'Educación',
-  'ropa': 'Ropa',
-  'servicios': 'Servicios',
+  'ropa': 'Ropa y Vestimenta',
+  'servicios': 'Servicios Básicos',
+  'impuestos': 'Impuestos',
+  'supermercado': 'Supermercado',
   'otros-gastos': 'Otros gastos'
 }
 
@@ -52,9 +56,11 @@ export default function TransactionList({ transactions, onEdit, onDelete, loadin
   }
 
   const formatAmount = (amount: number, type: string) => {
-    const formattedAmount = new Intl.NumberFormat('es-ES', {
+    const formattedAmount = new Intl.NumberFormat('es-CL', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'CLP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(amount)
     
     return type === 'ingreso' ? `+${formattedAmount}` : `-${formattedAmount}`
@@ -94,6 +100,16 @@ export default function TransactionList({ transactions, onEdit, onDelete, loadin
       <div className="bg-white rounded-lg shadow-md p-8 text-center">
         <div className="text-gray-500 text-lg mb-2">No hay transacciones</div>
         <p className="text-gray-400">Agrega tu primera transacción para comenzar a rastrear tus finanzas</p>
+      </div>
+    )
+  }
+
+  // Validación defensiva
+  if (!Array.isArray(transactions)) {
+    console.error('TransactionList: transactions is not an array:', transactions)
+    return (
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <p className="text-red-600">Error: Los datos de transacciones no son válidos</p>
       </div>
     )
   }

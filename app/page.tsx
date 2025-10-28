@@ -9,7 +9,7 @@ import ExportButton from '@/components/ExportButton'
 import SimpleCharts from '@/components/SimpleCharts'
 import ThemeToggle from '@/components/ThemeToggle'
 import ToastContainer, { useToast } from '@/components/Toast'
-import DATABASE_CONFIG from '@/lib/database-config'
+import { DATABASE_CONFIG } from '@/lib/database-config'
 
 interface Transaction {
   _id?: string  // MongoDB
@@ -86,10 +86,13 @@ export default function Home() {
   const fetchTransactions = async () => {
     try {
       const url = `${DATABASE_CONFIG.endpoints.transactions()}?limit=100`
+      console.log('🔍 Fetching from URL:', url)
       const response = await fetch(url)
+      console.log('🔍 Response status:', response.status)
       const data = await response.json()
+      console.log('🔍 Response data:', data)
       
-      if (data.success) {
+      if (data.success && Array.isArray(data.data)) {
         setAllTransactions(data.data)
         setTransactions(data.data)
         setFilteredTransactions(data.data)
@@ -109,8 +112,11 @@ export default function Home() {
   const fetchStats = async () => {
     try {
       const url = DATABASE_CONFIG.endpoints.stats()
+      console.log('📊 Fetching stats from URL:', url)
       const response = await fetch(url)
+      console.log('📊 Stats response status:', response.status)
       const data = await response.json()
+      console.log('📊 Stats response data:', data)
       
       if (data.success) {
         setStats(data.data.summary)
@@ -312,6 +318,8 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       {/* Toast Container */}
       <ToastContainer />
+      
+
       
       {/* Header */}
       <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors">

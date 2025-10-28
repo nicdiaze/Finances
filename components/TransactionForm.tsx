@@ -14,17 +14,21 @@ const CATEGORIES = {
     { value: 'freelance', label: 'Freelance' },
     { value: 'inversiones', label: 'Inversiones' },
     { value: 'ventas', label: 'Ventas' },
+    { value: 'aguinaldo', label: 'Aguinaldo' },
+    { value: 'bonos', label: 'Bonos' },
     { value: 'otros-ingresos', label: 'Otros ingresos' }
   ],
   gasto: [
     { value: 'alimentacion', label: 'Alimentación' },
-    { value: 'transporte', label: 'Transporte' },
-    { value: 'vivienda', label: 'Vivienda' },
-    { value: 'salud', label: 'Salud' },
+    { value: 'transporte', label: 'Transporte/Locomoción' },
+    { value: 'vivienda', label: 'Vivienda/Arriendo' },
+    { value: 'salud', label: 'Salud/Isapre' },
     { value: 'entretenimiento', label: 'Entretenimiento' },
     { value: 'educacion', label: 'Educación' },
-    { value: 'ropa', label: 'Ropa' },
-    { value: 'servicios', label: 'Servicios' },
+    { value: 'ropa', label: 'Ropa y Vestimenta' },
+    { value: 'servicios', label: 'Servicios Básicos' },
+    { value: 'impuestos', label: 'Impuestos' },
+    { value: 'supermercado', label: 'Supermercado' },
     { value: 'otros-gastos', label: 'Otros gastos' }
   ]
 }
@@ -104,8 +108,8 @@ export default function TransactionForm({ onSubmit, onCancel, initialData }: Tra
         </div>
 
         <div>
-          <label htmlFor="amount" className="block text-sm font-medium text-gray-700 mb-1">
-            Monto ($)
+          <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+            Monto (CLP)
           </label>
           <input
             type="number"
@@ -113,16 +117,16 @@ export default function TransactionForm({ onSubmit, onCancel, initialData }: Tra
             name="amount"
             value={formData.amount}
             onChange={handleChange}
-            step="0.01"
-            min="0.01"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            step="1"
+            min="1"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             required
           />
         </div>
       </div>
 
       <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Descripción
         </label>
         <input
@@ -132,14 +136,14 @@ export default function TransactionForm({ onSubmit, onCancel, initialData }: Tra
           value={formData.description}
           onChange={handleChange}
           maxLength={200}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
           required
         />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Categoría
           </label>
           <select
@@ -147,7 +151,7 @@ export default function TransactionForm({ onSubmit, onCancel, initialData }: Tra
             name="category"
             value={formData.category}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             required
           >
             <option value="">Selecciona una categoría</option>
@@ -160,7 +164,7 @@ export default function TransactionForm({ onSubmit, onCancel, initialData }: Tra
         </div>
 
         <div>
-          <label htmlFor="date" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="date" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Fecha
           </label>
           <input
@@ -169,7 +173,7 @@ export default function TransactionForm({ onSubmit, onCancel, initialData }: Tra
             name="date"
             value={formData.date}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
             required
           />
         </div>
@@ -188,7 +192,7 @@ export default function TransactionForm({ onSubmit, onCancel, initialData }: Tra
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 transition-colors"
           >
             Cancelar
           </button>
