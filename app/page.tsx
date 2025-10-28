@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import TransactionForm from '@/components/TransactionForm'
 import TransactionList from '@/components/TransactionList'
 import FinanceStats from '@/components/FinanceStats'
@@ -8,6 +9,7 @@ import FilterBar from '@/components/FilterBar'
 import ExportButton from '@/components/ExportButton'
 import SimpleCharts from '@/components/SimpleCharts'
 import ThemeToggle from '@/components/ThemeToggle'
+import LoginButton from '@/components/LoginButton'
 import ToastContainer, { useToast } from '@/components/Toast'
 import { DATABASE_CONFIG } from '@/lib/database-config'
 
@@ -49,6 +51,7 @@ interface ChartData {
 }
 
 export default function Home() {
+  const { data: session, status } = useSession()
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([])
   const [allTransactions, setAllTransactions] = useState<Transaction[]>([])
@@ -76,6 +79,31 @@ export default function Home() {
   })
   const [searchQuery, setSearchQuery] = useState('')
   const toast = useToast()
+
+  // Si no hay sesión, mostrar pantalla de login
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Cargando...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="max-w-md mx-auto p-8">
+          <div className="absolute top-4 right-4">
+            <ThemeToggle />
+          </div>
+          <LoginButton />
+        </div>
+      </div>
+    )
+  }
 
   // Helper para obtener ID de transacción (compatible con MongoDB y Firebase)
   const getTransactionId = (transaction: Transaction): string => {
@@ -330,12 +358,13 @@ export default function Home() {
                 💰 Historial Financiero
               </h1>
               <p className="text-gray-600 dark:text-gray-300 mt-1">
-                Gestiona tus ingresos y gastos de forma sencilla
+                Hola {session.user?.name}, gestiona tus finanzas personales
               </p>
             </div>
             
             <div className="flex items-center space-x-4">
               <ThemeToggle />
+              <LoginButton />
               <button
                 onClick={() => {
                   setShowForm(!showForm)
